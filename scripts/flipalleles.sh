@@ -1,4 +1,6 @@
-build/kirill flipalleles \ 
+#!/bin/bash
+
+build/kirill flipalleles \
 	--sumstats test_data/wrong_alleles.tsv \
 	--sumstats-effect-allele Allele1 \
 	--sumstats-other-allele Allele2 \

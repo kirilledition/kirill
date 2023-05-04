@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -75,8 +76,8 @@ func parseSumstatsFileToMap(
 
 		snp := record[SNPIndex]
 		referenceSNPMapping[snp] = Alleles{
-			Effect: record[effectAlleleIndex],
-			Other:  record[otherAlleleIndex],
+			Effect: strings.ToUpper(record[effectAlleleIndex]),
+			Other:  strings.ToUpper(record[otherAlleleIndex]),
 		}
 	}
 
@@ -157,9 +158,10 @@ func processAndWriteFlippedStats(
 		}
 
 		if referenceAlleles, ok := referenceSNPMapping[snp]; ok {
-			if effectAllele == referenceAlleles.Other && otherAllele == referenceAlleles.Effect {
+			if strings.ToUpper(effectAllele) == referenceAlleles.Other &&
+				strings.ToUpper(otherAllele) == referenceAlleles.Effect {
 
-				fmt.Println("Flipping alleles for SNP", snp)
+				logger.Println("Flipping alleles for SNP", snp)
 				record[effectAlleleIndex] = otherAllele
 				record[otherAlleleIndex] = effectAllele
 				record[effectIndex] = fmt.Sprintf("%.7f", flippingFunction(effect))
@@ -198,7 +200,7 @@ func flipAlleles(
 		referenceOtherAlleleFieldName,
 	)
 	if err != nil {
-		fmt.Println(err)
+		logger.Fatalln(err)
 		os.Exit(1)
 	}
 	err = processAndWriteFlippedStats(
@@ -212,7 +214,7 @@ func flipAlleles(
 		referenceSNPMapping,
 	)
 	if err != nil {
-		fmt.Println(err)
+		logger.Fatalln(err)
 		os.Exit(1)
 	}
 	return nil
@@ -221,7 +223,7 @@ func flipAlleles(
 var flipallelesCmd = &cobra.Command{
 	Use:   "flipalleles",
 	Short: "Flip alleles in a summary statistics file",
-	Long: `The Allele Flipping Program is a command-line tool designed to process and modify genetic
+	Long: `flipalleles is a command-line tool designed to process and modify genetic
 	summary statistics data by flipping alleles and their corresponding effects according to a
 	reference summary statistics file. The primary use case for this program is to harmonize the
 	data from two separate summary statistics files, ensuring consistency in allele
@@ -240,6 +242,16 @@ var flipallelesCmd = &cobra.Command{
 		referenceSNPFieldName, _ := cmd.Flags().GetString("reference-snp")
 
 		outputFilename, _ := cmd.Flags().GetString("output")
+
+		var logFile *os.File
+		var err error
+
+		logger, logFile, err = getLogger(outputFilename)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		defer logFile.Close()
 
 		flipAlleles(
 			referenceFilename,
@@ -261,16 +273,18 @@ func init() {
 	rootCmd.AddCommand(flipallelesCmd)
 
 	flipallelesCmd.Flags().StringP("sumstats", "", "", "Summary statistics file")
-	flipallelesCmd.Flags().StringP("sumstats-effect-allele", "", "", "Effect allele field name in summary statistics file")
-	flipallelesCmd.Flags().StringP("sumstats-other-allele", "", "", "Other allele field name in summary statistics file")
-	flipallelesCmd.Flags().StringP("sumstats-snp", "", "", "SNP field name in summary statistics file")
-	flipallelesCmd.Flags().StringP("sumstats-effect", "", "", "Effect field name in summary statistics file")
-	flipallelesCmd.Flags().StringP("effect-type", "", "", "Effect type (beta or odds ratio)")
+	flipallelesCmd.MarkFlagRequired("sumstats")
+	flipallelesCmd.Flags().StringP("sumstats-effect-allele", "", "A1", "Effect allele field name in summary statistics file")
+	flipallelesCmd.Flags().StringP("sumstats-other-allele", "", "A2", "Other allele field name in summary statistics file")
+	flipallelesCmd.Flags().StringP("sumstats-snp", "", "SNP", "SNP field name in summary statistics file")
+	flipallelesCmd.Flags().StringP("sumstats-effect", "", "BETA", "Effect field name in summary statistics file")
+	flipallelesCmd.Flags().StringP("effect-type", "", "BETA", "Effect type (BETA or OR)")
 
 	flipallelesCmd.Flags().StringP("reference", "", "", "Reference file")
-	flipallelesCmd.Flags().StringP("reference-effect-allele", "", "", "Effect allele field name in reference file")
-	flipallelesCmd.Flags().StringP("reference-other-allele", "", "", "Other allele field name in reference file")
-	flipallelesCmd.Flags().StringP("reference-snp", "", "", "SNP field name in reference file")
+	flipallelesCmd.MarkFlagRequired("reference")
+	flipallelesCmd.Flags().StringP("reference-effect-allele", "", "A1", "Effect allele field name in reference file")
+	flipallelesCmd.Flags().StringP("reference-other-allele", "", "A2", "Other allele field name in reference file")
+	flipallelesCmd.Flags().StringP("reference-snp", "", "SNP", "SNP field name in reference file")
 
 	flipallelesCmd.Flags().StringP("output", "", "", "Output file")
 }
