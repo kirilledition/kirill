@@ -11,13 +11,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func indexOf[T comparable](collection []T, el T) int {
+func indexOf[T comparable](collection []T, el T) (int, error) {
 	for i, x := range collection {
 		if x == el {
-			return i
+			return i, nil
 		}
 	}
-	return -1
+	return -1, fmt.Errorf("Column with name '%v' not found", el)
 }
 
 func flipBeta(beta float64) float64 {
@@ -55,9 +55,18 @@ func parseSumstatsFileToMap(
 		return nil, err
 	}
 
-	SNPIndex := indexOf(header, SNPFieldName)
-	effectAlleleIndex := indexOf(header, effectAlleleFieldName)
-	otherAlleleIndex := indexOf(header, otherAlleleFieldName)
+	SNPIndex, err := indexOf(header, SNPFieldName)
+	if err != nil {
+		return nil, err
+	}
+	effectAlleleIndex, err := indexOf(header, effectAlleleFieldName)
+	if err != nil {
+		return nil, err
+	}
+	otherAlleleIndex, err := indexOf(header, otherAlleleFieldName)
+	if err != nil {
+		return nil, err
+	}
 
 	for {
 		record, err := reader.Read()
@@ -122,10 +131,22 @@ func processAndWriteFlippedStats(
 		return err
 	}
 
-	SNPIndex := indexOf(header, SNPFieldName)
-	effectAlleleIndex := indexOf(header, effectAlleleFieldName)
-	otherAlleleIndex := indexOf(header, otherAlleleFieldName)
-	effectIndex := indexOf(header, effectFieldName)
+	SNPIndex, err := indexOf(header, SNPFieldName)
+	if err != nil {
+		return err
+	}
+	effectAlleleIndex, err := indexOf(header, effectAlleleFieldName)
+	if err != nil {
+		return err
+	}
+	otherAlleleIndex, err := indexOf(header, otherAlleleFieldName)
+	if err != nil {
+		return err
+	}
+	effectIndex, err := indexOf(header, effectFieldName)
+	if err != nil {
+		return err
+	}
 
 	err = writer.Write(header)
 	if err != nil {
