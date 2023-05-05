@@ -22,7 +22,7 @@ jobs:
       run: go mod download
 
     - name: Create temporary folder
-        run: mkdir /tmp
+      run: mkdir /tmp
 
     - name: Run tests
       run: go test -v kirill/cmd
