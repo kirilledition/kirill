@@ -135,12 +135,15 @@ func Test_PDBClient_fetch(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	outputPath := t.TempDir()
-	// outputPath, err := ioutil.TempDir("", "pdbtest")
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// defer os.RemoveAll(outputPath)
+	workspace, ok := os.LookupEnv("GITHUB_WORKSPACE")
+	if !ok {
+		workspace = ""
+	}
+	outputPath, err := ioutil.TempDir(workspace, "pdbtest")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(outputPath)
 
 	client := &PDBClient{
 		scheme: ts.URL,
@@ -149,7 +152,7 @@ func Test_PDBClient_fetch(t *testing.T) {
 
 	logger = log.New(ioutil.Discard, "", 0)
 
-	err := client.fetch(testPDBID, outputPath)
+	err = client.fetch(testPDBID, outputPath)
 	if err != nil {
 		t.Fatalf("fetch() returned error: %v", err)
 	}
@@ -177,12 +180,15 @@ func Test_fetchPDB(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	// outputPath, err := ioutil.TempDir("", "pdbtest")
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// defer os.RemoveAll(outputPath)
-	outputPath := t.TempDir()
+	workspace, ok := os.LookupEnv("GITHUB_WORKSPACE")
+	if !ok {
+		workspace = ""
+	}
+	outputPath, err := ioutil.TempDir(workspace, "pdbtest")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(outputPath)
 
 	input := []string{testPDBID}
 
@@ -209,16 +215,15 @@ func Test_fetchPDB(t *testing.T) {
 func Test_fetchPDB_API(t *testing.T) {
 	testPDBID := "3NIR"
 
-	// workspace, ok := os.LookupEnv("GITHUB_WORKSPACE")
-	// if !ok {
-	// 	workspace = ""
-	// }
-	// outputPath, err := ioutil.TempDir(workspace, "pdbtest")
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// defer os.RemoveAll(outputPath)
-	outputPath := t.TempDir()
+	workspace, ok := os.LookupEnv("GITHUB_WORKSPACE")
+	if !ok {
+		workspace = ""
+	}
+	outputPath, err := ioutil.TempDir(workspace, "pdbtest")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(outputPath)
 
 	input := []string{testPDBID}
 
@@ -234,7 +239,7 @@ func Test_fetchPDB_API(t *testing.T) {
 	fetchPDB(input, outputPath, client)
 
 	filename := path.Join(outputPath, strings.ToUpper(testPDBID)+".pdb")
-	_, err := os.Stat(filename)
+	_, err = os.Stat(filename)
 	if err != nil {
 		t.Fatalf("could not find fetched file: %v", err)
 	}
