@@ -139,15 +139,8 @@ Example usage:
 
 3. Download structures from an input file and save them to a specific output directory:
    kirill fetchpdb pdb_ids.txt -o /path/to/output`,
-
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-
-		if len(args) < 1 {
-			fmt.Println("Error: At least one PDB ID or an input file containing PDB IDs is required.")
-			cmd.Help()
-			os.Exit(1)
-		}
-
 		outputPath, _ := cmd.Flags().GetString("output")
 
 		var logFile *os.File
