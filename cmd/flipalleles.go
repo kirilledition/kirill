@@ -20,13 +20,6 @@ func indexOf[T comparable](collection []T, el T) int {
 	return -1
 }
 
-type EffectType string
-
-const (
-	BETA EffectType = "BETA"
-	OR   EffectType = "OR"
-)
-
 func flipBeta(beta float64) float64 {
 	return -1 * beta
 }
@@ -44,7 +37,7 @@ func parseSumstatsFileToMap(
 	filename,
 	SNPFieldName,
 	effectAlleleFieldName,
-	otherAlleleFieldName string) (map[string]Alleles, error) {
+	otherAlleleFieldName string) (map[string][]Alleles, error) {
 
 	file, err := os.Open(filename)
 	if err != nil {
@@ -55,7 +48,7 @@ func parseSumstatsFileToMap(
 	reader := csv.NewReader(file)
 	reader.Comma = '\t'
 
-	referenceSNPMapping := make(map[string]Alleles)
+	referenceSNPMapping := make(map[string][]Alleles)
 
 	header, err := reader.Read()
 	if err != nil {
@@ -75,10 +68,11 @@ func parseSumstatsFileToMap(
 		}
 
 		snp := record[SNPIndex]
-		referenceSNPMapping[snp] = Alleles{
+		alleles := Alleles{
 			Effect: strings.ToUpper(record[effectAlleleIndex]),
 			Other:  strings.ToUpper(record[otherAlleleIndex]),
 		}
+		referenceSNPMapping[snp] = append(referenceSNPMapping[snp], alleles)
 	}
 
 	return referenceSNPMapping, nil
@@ -92,14 +86,14 @@ func processAndWriteFlippedStats(
 	otherAlleleFieldName,
 	effectFieldName,
 	effectType string,
-	referenceSNPMapping map[string]Alleles,
+	referenceSNPMapping map[string][]Alleles,
 ) error {
 
 	var flippingFunction func(effect float64) float64
 	switch effectType {
-	case string(BETA):
+	case "BETA":
 		flippingFunction = flipBeta
-	case string(OR):
+	case "OR":
 		flippingFunction = flipOR
 	default:
 		return fmt.Errorf("unknown effect type: %s", effectType)
@@ -158,21 +152,25 @@ func processAndWriteFlippedStats(
 			return err
 		}
 
-		if referenceAlleles, ok := referenceSNPMapping[snp]; ok {
-			if strings.ToUpper(effectAllele) == referenceAlleles.Other &&
-				strings.ToUpper(otherAllele) == referenceAlleles.Effect {
+		if referenceAllelesList, ok := referenceSNPMapping[snp]; ok {
+			for _, referenceAlleles := range referenceAllelesList {
+				if strings.ToUpper(effectAllele) == referenceAlleles.Other &&
+					strings.ToUpper(otherAllele) == referenceAlleles.Effect {
 
-				flippedEffect = flippingFunction(effect)
+					flippedEffect = flippingFunction(effect)
 
-				logger.Printf(
-					"Flipping SNP %s: Alleles, (%s,%s)->(%s,%s), Effect %.3f -> %.3f",
-					snp, effectAllele, otherAllele, referenceAlleles.Effect, referenceAlleles.Other, effect, flippedEffect,
-				)
+					logger.Printf(
+						"Flipping SNP %s: Alleles, (%s,%s)->(%s,%s), Effect %.3f -> %.3f",
+						snp, effectAllele, otherAllele, referenceAlleles.Effect, referenceAlleles.Other, effect, flippedEffect,
+					)
 
-				record[effectAlleleIndex] = referenceAlleles.Other
-				record[otherAlleleIndex] = referenceAlleles.Effect
-				record[effectIndex] = fmt.Sprintf("%.7f", flippedEffect)
+					record[effectAlleleIndex] = referenceAlleles.Other
+					record[otherAlleleIndex] = referenceAlleles.Effect
+					record[effectIndex] = fmt.Sprintf("%.7f", flippedEffect)
 
+					// Break the loop once the matching allele pair is found and flipped
+					break
+				}
 			}
 		}
 
