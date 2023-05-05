@@ -99,18 +99,11 @@ func (c *PDBClient) fetch(id string, outputPath string) error {
 	return nil
 }
 
-func fetchPDB(input []string, outputPath string) {
+func fetchPDB(input []string, outputPath string, client *PDBClient) {
 	ids, err := readPDBIdList(input)
 	if err != nil {
 		logger.Fatalln(err)
 		os.Exit(1)
-	}
-
-	client := &PDBClient{
-		scheme: "https",
-		host:   "files.rcsb.org",
-		path:   "download",
-		client: &http.Client{},
 	}
 
 	for _, id := range ids {
@@ -154,7 +147,14 @@ Example usage:
 		}
 		defer logFile.Close()
 
-		fetchPDB(args, outputPath)
+		client := &PDBClient{
+			scheme: "https",
+			host:   "files.rcsb.org",
+			path:   "download",
+			client: &http.Client{},
+		}
+
+		fetchPDB(args, outputPath, client)
 	},
 }
 
