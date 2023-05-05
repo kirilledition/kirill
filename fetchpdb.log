@@ -1,0 +1,4 @@
+INFO: 2023/05/05 13:46:17 kirill - Version: nonono, Git Commit: 0000000, Logging to file fetchpdb.log
+INFO: 2023/05/05 13:46:17 Invoked with following arguments: /var/folders/yz/9038h5tn5xv4svq6xh5yjdyr0000gn/T/go-build2791047263/b001/exe/main fetchpdb asdf
+INFO: 2023/05/05 13:46:17 Assuming input is a list of PDB IDs
+INFO: 2023/05/05 13:46:18 gzip: invalid header

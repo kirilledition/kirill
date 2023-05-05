@@ -147,6 +147,8 @@ Example usage:
 		}
 		defer logFile.Close()
 
+		logger.Println(getCommandLine())
+
 		client := &PDBClient{
 			scheme: "https",
 			host:   "files.rcsb.org",
