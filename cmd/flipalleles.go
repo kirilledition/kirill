@@ -250,10 +250,10 @@ var flipallelesCmd = &cobra.Command{
 	Use:   "flipalleles",
 	Short: "Flip alleles in a summary statistics file",
 	Long: `flipalleles is a command-line tool designed to process and modify genetic
-	summary statistics data by flipping alleles and their corresponding effects according to a
-	reference summary statistics file. The primary use case for this program is to harmonize the
-	data from two separate summary statistics files, ensuring consistency in allele
-	representation and effects direction.`,
+summary statistics data by flipping alleles and their corresponding effects according to a
+reference summary statistics file. The primary use case for this program is to harmonize the
+data from two separate summary statistics files, ensuring consistency in allele
+representation and effects direction.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		sumstatsFilename, _ := cmd.Flags().GetString("sumstats")
 		sumstatsEffectAlleleFieldName, _ := cmd.Flags().GetString("sumstats-effect-allele")
