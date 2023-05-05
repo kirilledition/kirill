@@ -279,6 +279,8 @@ representation and effects direction.`,
 		}
 		defer logFile.Close()
 
+		logger.Println(getCommandLine())
+
 		flipAlleles(
 			referenceFilename,
 			referenceSNPFieldName,
