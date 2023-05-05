@@ -24,5 +24,5 @@ func getLogger(filename string) (*log.Logger, *os.File, error) {
 }
 
 func getCommandLine() string {
-	return "Invoked with following arguments: \n" + strings.Join(os.Args, " \\ \n")
+	return "Invoked with following arguments: " + strings.Join(os.Args, " ")
 }
