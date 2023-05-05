@@ -40,9 +40,11 @@ kirill fetchpdb pdb_ids.txt
 kirill fetchpdb pdb_ids.txt -o /path/to/output
 ```
 
-### 2. flipalleles
+### flipalleles
 
-`flipalleles` is a command-line tool designed to process and modify genetic summary statistics data by flipping alleles and their corresponding effects according to a reference summary statistics file. The primary use case for this program is to harmonize the data from two separate summary statistics files, ensuring consistency in allele representation and effects direction.
+flipalleles is a command-line tool designed to process and modify genetic summary statistics data by flipping alleles and their corresponding effects according to a reference summary statistics file. The primary use case for this program is to harmonize the data from two separate summary statistics files, ensuring consistency in allele representation and effects direction. 
+
+This tool was developed to address issues encountered when using the METAL meta-analysis program, which flips alleles in its summary statistics file.
 
 **Example usage:**
 
