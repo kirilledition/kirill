@@ -140,6 +140,7 @@ func processAndWriteFlippedStats(
 
 	var snp, effectAllele, otherAllele string
 	var effect float64
+	var flippedEffect float64
 
 	for {
 		record, err := reader.Read()
@@ -161,10 +162,16 @@ func processAndWriteFlippedStats(
 			if strings.ToUpper(effectAllele) == referenceAlleles.Other &&
 				strings.ToUpper(otherAllele) == referenceAlleles.Effect {
 
-				logger.Println("Flipping alleles for SNP", snp)
-				record[effectAlleleIndex] = otherAllele
-				record[otherAlleleIndex] = effectAllele
-				record[effectIndex] = fmt.Sprintf("%.7f", flippingFunction(effect))
+				flippedEffect = flippingFunction(effect)
+
+				logger.Printf(
+					"Flipping SNP %s: Alleles, (%s,%s)->(%s,%s), Effect %.3f -> %.3f",
+					snp, effectAllele, otherAllele, referenceAlleles.Effect, referenceAlleles.Other, effect, flippedEffect,
+				)
+
+				record[effectAlleleIndex] = referenceAlleles.Other
+				record[otherAlleleIndex] = referenceAlleles.Effect
+				record[effectIndex] = fmt.Sprintf("%.7f", flippedEffect)
 
 			}
 		}
