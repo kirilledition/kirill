@@ -207,12 +207,16 @@ func Test_fetchPDB(t *testing.T) {
 func Test_fetchPDB_API(t *testing.T) {
 	testPDBID := "3NIR"
 
-	// outputPath, err := ioutil.TempDir("", "pdbtest")
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// defer os.RemoveAll(outputPath)
-	outputPath := t.TempDir()
+	workspace, ok := os.LookupEnv("GITHUB_WORKSPACE")
+	if !ok {
+		workspace = ""
+	}
+	outputPath, err := ioutil.TempDir(workspace, "pdbtest")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(outputPath)
+	// outputPath := t.TempDir()
 
 	input := []string{testPDBID}
 
@@ -228,7 +232,7 @@ func Test_fetchPDB_API(t *testing.T) {
 	fetchPDB(input, outputPath, client)
 
 	filename := path.Join(outputPath, strings.ToUpper(testPDBID)+".pdb")
-	_, err := os.Stat(filename)
+	_, err = os.Stat(filename)
 	if err != nil {
 		t.Fatalf("could not find fetched file: %v", err)
 	}
