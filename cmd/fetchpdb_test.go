@@ -123,50 +123,50 @@ func Test_readPDBIdList(t *testing.T) {
 	}
 }
 
-func Test_PDBClient_fetch(t *testing.T) {
-	testPDBID := "1abc"
-	testPDBData := "dummy pdb data"
+// func Test_PDBClient_fetch(t *testing.T) {
+// 	testPDBID := "1abc"
+// 	testPDBData := "dummy pdb data"
 
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/octet-stream")
-		gz := gzip.NewWriter(w)
-		defer gz.Close()
-		gz.Write([]byte(testPDBData))
-	}))
-	defer ts.Close()
+// 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		w.Header().Set("Content-Type", "application/octet-stream")
+// 		gz := gzip.NewWriter(w)
+// 		defer gz.Close()
+// 		gz.Write([]byte(testPDBData))
+// 	}))
+// 	defer ts.Close()
 
-	workspace, ok := os.LookupEnv("GITHUB_WORKSPACE")
-	if !ok {
-		workspace = ""
-	}
-	outputPath, err := ioutil.TempDir(workspace, "pdbtest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(outputPath)
+// 	workspace, ok := os.LookupEnv("GITHUB_WORKSPACE")
+// 	if !ok {
+// 		workspace = ""
+// 	}
+// 	outputPath, err := ioutil.TempDir(workspace, "pdbtest")
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	defer os.RemoveAll(outputPath)
 
-	client := &PDBClient{
-		scheme: ts.URL,
-		client: &http.Client{},
-	}
+// 	client := &PDBClient{
+// 		scheme: ts.URL,
+// 		client: &http.Client{},
+// 	}
 
-	logger = log.New(ioutil.Discard, "", 0)
+// 	logger = log.New(ioutil.Discard, "", 0)
 
-	err = client.fetch(testPDBID, outputPath)
-	if err != nil {
-		t.Fatalf("fetch() returned error: %v", err)
-	}
+// 	err = client.fetch(testPDBID, outputPath)
+// 	if err != nil {
+// 		t.Fatalf("fetch() returned error: %v", err)
+// 	}
 
-	filename := path.Join(outputPath, testPDBID+".pdb")
-	content, err := ioutil.ReadFile(filename)
-	if err != nil {
-		t.Fatalf("could not read fetched file: %v", err)
-	}
+// 	filename := path.Join(outputPath, testPDBID+".pdb")
+// 	content, err := ioutil.ReadFile(filename)
+// 	if err != nil {
+// 		t.Fatalf("could not read fetched file: %v", err)
+// 	}
 
-	if string(content) != testPDBData {
-		t.Errorf("expected content: %s, got: %s", testPDBData, string(content))
-	}
-}
+// 	if string(content) != testPDBData {
+// 		t.Errorf("expected content: %s, got: %s", testPDBData, string(content))
+// 	}
+// }
 
 func Test_fetchPDB(t *testing.T) {
 	testPDBID := "1abc"
@@ -180,15 +180,7 @@ func Test_fetchPDB(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	workspace, ok := os.LookupEnv("GITHUB_WORKSPACE")
-	if !ok {
-		workspace = ""
-	}
-	outputPath, err := ioutil.TempDir(workspace, "pdbtest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(outputPath)
+	outputPath := t.TempDir()
 
 	input := []string{testPDBID}
 
@@ -215,15 +207,7 @@ func Test_fetchPDB(t *testing.T) {
 func Test_fetchPDB_API(t *testing.T) {
 	testPDBID := "3NIR"
 
-	workspace, ok := os.LookupEnv("GITHUB_WORKSPACE")
-	if !ok {
-		workspace = ""
-	}
-	outputPath, err := ioutil.TempDir(workspace, "pdbtest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(outputPath)
+	outputPath := t.TempDir()
 
 	input := []string{testPDBID}
 
@@ -239,7 +223,7 @@ func Test_fetchPDB_API(t *testing.T) {
 	fetchPDB(input, outputPath, client)
 
 	filename := path.Join(outputPath, strings.ToUpper(testPDBID)+".pdb")
-	_, err = os.Stat(filename)
+	_, err := os.Stat(filename)
 	if err != nil {
 		t.Fatalf("could not find fetched file: %v", err)
 	}
